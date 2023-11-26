@@ -1,0 +1,23 @@
+﻿@page "/backup"
+@rendermode InteractiveServer
+
+
+
+<AuthorizeView Roles="User">
+    <Authorized>
+        <h3>Fazer Backup</h3>
+    </Authorized>
+    <Authorizing>
+        <p>Checking...</p>
+    </Authorizing>
+    <NotAuthorized>
+        <p>You're not an User.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
+@code {
+
+}

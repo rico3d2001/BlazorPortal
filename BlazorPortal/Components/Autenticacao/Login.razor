@@ -1,0 +1,76 @@
+﻿@page "/login"
+@rendermode InteractiveAuto
+
+@inject HttpClient Http
+@inject NavigationManager navigation
+@inject TokenAutheticationProvider authStateProvider
+
+<Aviso Exibir="loginFalhou">
+    <h5>@Mensagem</h5>
+</Aviso>
+
+
+<div class="container col-6">
+    <div class="card-body">
+        <h5 class="card-title">Login</h5>
+        <EditForm FormName="Login" Model="userLogin" OnSubmit="FazerLogin">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Email</label>
+                <InputText class="form-control"
+                           id="email"
+                           aria-describedby="emailHelp"
+                           placeholder="Enter email"
+                           @bind-Value="userLogin.Email" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <InputText class="form-control"
+                           id="password"
+                           placeholder="Password"
+                           @bind-Value="userLogin.Password" />
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Login</button>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+    UserLogin userLogin = new UserLogin();
+    bool loginFalhou = false;
+
+    [Parameter]
+    public string Mensagem { get; set; } = "";
+
+
+
+    private async Task FazerLogin()
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(userLogin);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await Http.PostAsync("https://localhost:5000/api/Authorize/v1/GenerateToken", data);
+            if (!response.IsSuccessStatusCode)
+            {
+                loginFalhou = true;
+                Mensagem = "Não foi possível realizar o login do usuário.(Erro: "
+                           + $"{response.StatusCode}";
+                return;
+            }
+            var result = await response.Content.ReadAsStringAsync();
+            var loginResult = JsonSerializer.Deserialize<UserToken>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            await authStateProvider.Login(loginResult.Token);
+            navigation.NavigateTo("/");
+        }
+        catch (Exception)
+        {
+            loginFalhou = true;
+            Mensagem = "Não foi possível realizar o login do usuário...";
+        }
+
+    }
+
+
+}

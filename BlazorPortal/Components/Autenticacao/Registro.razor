@@ -1,0 +1,76 @@
+﻿@page "/registro"
+@rendermode InteractiveAuto
+
+@inject HttpClient Http
+@inject NavigationManager navigation
+
+<h2>Registrar novo Usuário</h2>
+
+<Aviso Exibir="Exibir">
+    <h5>@Mensagem</h5>
+    </Aviso>
+
+<div class="container col-6">
+    <div class="card-body">
+        <h5 class="card-title">Login</h5>
+        <EditForm FormName="Login" Model="userRegistro" OnSubmit="Registrar">
+            <div class="form-group">
+                <label for="exampleInputEmail1">Email</label>
+                <InputText class="form-control"
+                           id="email"
+                           aria-describedby="emailHelp"
+                           placeholder="Enter email"
+                           @bind-Value="userRegistro.Email" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">User Name</label>
+                <InputText class="form-control"
+                           id="email"
+                           aria-describedby="emailHelp"
+                           placeholder="Enter email"
+                           @bind-Value="userRegistro.UserName" />
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <InputText class="form-control"
+                           id="password"
+                           placeholder="Password"
+                           @bind-Value="userRegistro.Password" />
+            </div>
+            <button type="submit" class="btn btn-outline-primary">Login</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+
+    private UserRegistro userRegistro = new UserRegistro();
+
+    private bool Exibir = false;
+
+    [Parameter]
+    public string Mensagem { get; set; } = "";
+
+    public async Task Registrar()
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(userRegistro);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await Http.PostAsync("https://localhost:5000/api/Authorize/v1/RegistraUsuario", data);
+            if (!response.IsSuccessStatusCode)
+            {
+                Mensagem = $"Não foi possível realizar o registro do usuário.(Erro: {response.StatusCode})";
+                Exibir = true;
+                return;
+            }
+            navigation.NavigateTo("/login");
+        }
+        catch (Exception)
+        {
+            Mensagem = "Não foi possível realizar o registro do usuário...";
+            Exibir = true;
+        }
+    }
+
+}

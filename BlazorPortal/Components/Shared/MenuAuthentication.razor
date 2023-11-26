@@ -1,0 +1,26 @@
+﻿@rendermode InteractiveServer
+
+<AuthorizeView>
+    <Authorized>
+            <NavLink class="nav-link btn btn-link" href="profile">
+                <span class="oi oi-person" aria-hidden="true"></span> Profile
+            </NavLink>
+            <NavLink class="nav-link" href="logout">
+                <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+            </NavLink>
+    </Authorized>
+    <NotAuthorized>
+        <NavLink class="nav-link btn btn-link" href="login">
+                <span class="oi oi-account-login" aria-hidden="true"></span> Login
+            </NavLink>
+        <NavLink class="nav-link btn btn-link" href="registro">
+                <span class="oi oi-account-register" aria-hidden="true"></span> Registration
+            </NavLink>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+     
+
+    
+}
