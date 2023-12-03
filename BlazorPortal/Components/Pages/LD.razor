@@ -1,0 +1,85 @@
+﻿@page "/lds"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+
+<PageTitle>LDs</PageTitle>
+
+<h1>Lista de Documentos</h1>
+
+@if (collection == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <div class="grid">
+        <QuickGrid Items="@collectionFiltroQueryable" @ref="refgrig" Pagination="@pagination">
+            <PropertyColumn Property="@(p => p.NumeroContrato)" Title="Número" Sortable="true" />
+            <PropertyColumn Property="@(p => p.NumeroCliente)" Title="Número do Cliente" />
+            <PropertyColumn Property="@(p => p.Titulo)" Title="Títulos" />
+            <PropertyColumn Property="@(p => p.Revisao)" Title="Última Revisão">
+                <ColumnOptions>
+                    <input type="checkbox" @bind="ultimas" @bind:after="Filter" /> Mais altas
+                </ColumnOptions>
+            </PropertyColumn>
+            <TemplateColumn Title="Ação">
+                <button class="btn btn-primary" @onclick="@(() => ExibeStatus(context))">Status</button>
+            </TemplateColumn>
+        </QuickGrid>
+    </div>
+    <div>
+        times:
+        <select @bind="@pagination.ItemsPerPage">
+            <option>5</option>
+            <option>10</option>
+        </select>
+    </div>
+    <Paginator State="@pagination" />
+
+    <p>
+        <h4><b>@Mensagem</b></h4>
+    </p>
+}
+
+@code {
+    IQueryable<DocumentoView>? collection;
+    IQueryable<DocumentoView>? collectionFiltroQueryable;
+    private bool ultimas;
+    QuickGrid<DocumentoView>? refgrig;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
+
+    public string Mensagem { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(300);
+        CarregaDocs();
+
+    }
+
+    private void ExibeStatus(DocumentoView documento)
+    {
+        Mensagem = $"{documento.NumeroContrato}-{documento.Titulo}";
+    }
+
+    private void CarregaDocs()
+    {
+        collection = new CollectionLDView().DocumentoViews;
+        collectionFiltroQueryable = collection;
+    }
+
+    public async Task Filter()
+    {
+        if (ultimas)
+        {
+            var revisaoMax = collection.Max(r => r.Revisao);
+            collectionFiltroQueryable = collection.Where(x => x.Revisao == revisaoMax);
+        }
+        else
+        {
+            collectionFiltroQueryable = collection;
+        }
+        await refgrig!.RefreshDataAsync();
+    }
+
+}

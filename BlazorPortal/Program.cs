@@ -24,7 +24,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, TokenAutheticationProvid
     provider => provider.GetRequiredService<TokenAutheticationProvider>()
     );
 
-
+builder.Services.AddHttpClient();
 
 
 
