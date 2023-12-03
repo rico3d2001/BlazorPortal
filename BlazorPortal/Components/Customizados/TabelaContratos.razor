@@ -1,23 +1,22 @@
-﻿@page "/lds"
-@rendermode InteractiveAuto
-@attribute [StreamRendering]
+﻿@inject HttpClient http
 
-<PageTitle>LDs</PageTitle>
 
-<h1>Lista de Documentos</h1>
-
-@if (collection == null)
+@if (contratosFiltroQueryable == null)
 {
     <p><em>Carregando...</em></p>
+}
+else if (contratosFiltroQueryable.Count() == 0)
+{
+    <p><em>Não existem contratos cadastrados...</em></p>
 }
 else
 {
     <div class="grid">
-        <QuickGrid Items="@collectionFiltroQueryable" @ref="refgrig" Pagination="@pagination">
+        <QuickGrid Items="@contratosFiltroQueryable" @ref="refgrig" Pagination="@pagination">
             <PropertyColumn Property="@(p => p.NumeroContrato)" Title="Número" Sortable="true" />
             <PropertyColumn Property="@(p => p.NumeroCliente)" Title="Número do Cliente" />
-            <PropertyColumn Property="@(p => p.Titulo)" Title="Títulos" />
-            <PropertyColumn Property="@(p => p.Revisao)" Title="Última Revisão">
+            <PropertyColumn Property="@(p => p.Descricao)" Title="Descrição" />
+            <PropertyColumn Property="@(p => p.PrazoComentariosDias)" Title="Última Revisão">
                 <ColumnOptions>
                     <input type="checkbox" @bind="ultimas" @bind:after="Filter" /> Mais altas
                 </ColumnOptions>
@@ -41,11 +40,12 @@ else
     </p>
 }
 
+
 @code {
-    IQueryable<DocumentoView>? collection;
-    IQueryable<DocumentoView>? collectionFiltroQueryable;
+    IQueryable<ContratoView>? contratos;
+    IQueryable<ContratoView>? contratosFiltroQueryable;
     private bool ultimas;
-    QuickGrid<DocumentoView>? refgrig;
+    QuickGrid<ContratoView>? refgrig;
     PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
 
     public string Mensagem { get; set; } = string.Empty;
@@ -53,33 +53,33 @@ else
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(300);
-        CarregaDocs();
+        await CarregaCategorias();
 
     }
 
-    private void ExibeStatus(DocumentoView documento)
+    private void ExibeStatus(ContratoView documento)
     {
-        Mensagem = $"{documento.NumeroContrato}-{documento.Titulo}";
+        Mensagem = $"{documento.NumeroContrato}-{documento.Descricao}";
     }
 
-    private void CarregaDocs()
+    private async Task CarregaCategorias()
     {
-        collection = new CollectionLDView().DocumentoViews;
-        collectionFiltroQueryable = collection;
+        var lista = await http.GetFromJsonAsync<ContratoView[]>("https://localhost:5000/api/Contrato/v1/ObterContratos/650c946400015409e93dcc71");
+        contratos = lista.AsQueryable();
+        contratosFiltroQueryable = contratos;
     }
 
     public async Task Filter()
     {
         if (ultimas)
         {
-            var revisaoMax = collection.Max(r => r.Revisao);
-            collectionFiltroQueryable = collection.Where(x => x.Revisao == revisaoMax);
+            var revisaoMax = contratos.Max(r => r.PrazoComentariosDias);
+            contratosFiltroQueryable = contratos.Where(x => x.PrazoComentariosDias == revisaoMax);
         }
         else
         {
-            collectionFiltroQueryable = collection;
+            contratosFiltroQueryable = contratos;
         }
         await refgrig!.RefreshDataAsync();
     }
-
 }

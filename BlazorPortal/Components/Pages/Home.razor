@@ -1,34 +1,46 @@
 ﻿@page "/"
 @using System.Security.Claims
 @using BlazorPortal.Utils
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
 <PageTitle>Home</PageTitle>
 
 @if (user is not null)
 {
-    <h3>@user.Identity.Name</h3>
-    <div class="m-2 p-2">
-        Is Authenticated: @user.Identity.IsAuthenticated
-    </div>
-    <div class="m-2 p-2">
-        Authentication Type: @user.Identity.AuthenticationType
-    </div>
-    <div class="m-2 p-2">
-        Admin Role: @user.IsInRole("Admin")
-    </div>
-    <div class="m-2 p-2">
-        <h5>Claims</h5>
-        @foreach (var claim in user.Claims)
-        {
-            <span>
-                @claim.Type
-            </span>
-            <span>:</span>
-            <span>
-                @claim.Value
-            </span>
-            <br />
-        }
+    <div class="page">
+
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <article class="content px-4">
+                <h3>@user.Identity.Name</h3>
+                <div class="m-2 p-2">
+                    Is Authenticated: @user.Identity.IsAuthenticated
+                </div>
+                <div class="m-2 p-2">
+                    Authentication Type: @user.Identity.AuthenticationType
+                </div>
+                <div class="m-2 p-2">
+                    Admin Role: @user.IsInRole("Admin")
+                </div>
+                <div class="m-2 p-2">
+                    <h5>Claims</h5>
+                    @foreach (var claim in user.Claims)
+                    {
+                        <span>
+                            @claim.Type
+                        </span>
+                        <span>:</span>
+                        <span>
+                            @claim.Value
+                        </span>
+                        <br />
+                    }
+                </div>
+            </article>
+        </main>
+
     </div>
 }
 else
@@ -38,7 +50,7 @@ else
     </div>
 }
 
-@code{
+@code {
     [CascadingParameter]
     private Task<AuthenticationState> AuthTask { get; set; }
 
@@ -49,11 +61,11 @@ else
         var authState = await AuthTask;
         user = authState.User;
 
-        if(user.Identity.IsAuthenticated)
+        if (user.Identity.IsAuthenticated)
         {
             CorrecaoAuth.CorrigirRole(user);
         }
-       
+
     }
 }
 
